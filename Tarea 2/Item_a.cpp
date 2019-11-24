@@ -21,7 +21,6 @@ int moderados[K][2];
 int rats[2][2];
 pthread_mutex_t mu = PTHREAD_MUTEX_INITIALIZER;
 sem_t * semaphore;
-pthread_t pid[2];
 bool p = false;
 bool s = false;
 
