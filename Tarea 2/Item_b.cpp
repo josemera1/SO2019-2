@@ -118,7 +118,7 @@ class Monitor{
             for(int x=0;x<J;x++){
                 sem = true;
                 unique_lock<mutex> locker(mu);
-                cv.wait(locker,std::bind(Monitor::semaphore(),m));
+                cv.wait(locker,std::bind(Monitor::semaphore(),this));
                 dice = randomPosition() % 6;
                 if(dice == 2){
                     cout << "Flaite " << x+1 << " didn't move this turn." << endl;
