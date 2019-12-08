@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <time.h>
 #define M 5
 
 int matrix[M][M];
@@ -17,6 +19,7 @@ uint64_t rdtsc(){
 int sgn (int x){
 	if (x%2==0) return(1);
 	return(-1);
+
 }
 
 int randomNumber(){
@@ -56,7 +59,7 @@ void printMatrix(){
 
 void matrix_adj(int matrix[M][M], int matrix_aux[M][M], int dim, int m, int n) {
 	int i,j,p,q;
-	for (j=0, q=0; j<dim; ++j) 
+	for (j=0, q=0; j<dim; ++j)
 		if (j!=n) {
 			for (i=0, p=0; i<dim; ++i)
 				if (i!=m) {
@@ -88,10 +91,19 @@ void calculateInParallel(){
 }
 
 int main(){
+
+    clock_t start = clock();
+    clock_t end = clock();
+    double segundos;
+
+    start = clock();
     init();
     printf("=====================\n");
     printMatrix();
     printf("El determinante es %d\n",calculateInSeries(matrix,M));
     printf("=====================\n");
+    end = clock();
+    segundos = (double)(end - start)/CLOCKS_PER_SEC;
+    printf("Tiempo transcurrido: %f\n",segundos);
     return 0;
 }
