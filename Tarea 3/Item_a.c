@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#define M 5
+#include <time.h>
+#include <omp.h>
+#define M 3001
 
-int matrix[M][M];
-
-int calculateInSeries(int matrix[M][M], int dim);
+long double matrix[M][M];
 
 uint64_t rdtsc(){
     unsigned int lo,hi;
@@ -14,14 +14,9 @@ uint64_t rdtsc(){
     return ((uint64_t)hi << 32) | lo;
 }
 
-int sgn (int x){
-	if (x%2==0) return(1);
-	return(-1);
-}
-
 int randomNumber(){
     srand(rdtsc());
-    return (rand() % 10);
+    return (rand() % 9)+1;
 }
 
 void init(){ //Initializing the matrix
@@ -47,51 +42,66 @@ void printMatrix(){
             if(matrix[i][j] >= 0){
                 printf(" ");
             }
-            printf("%d ", matrix[i][j]);
+            printf("%Lf ", matrix[i][j]);
         }
         printf("\n");
     }
     printf("\n");
 }
 
-void matrix_adj(int matrix[M][M], int matrix_aux[M][M], int dim, int m, int n) {
-	int i,j,p,q;
-	for (j=0, q=0; j<dim; ++j) 
-		if (j!=n) {
-			for (i=0, p=0; i<dim; ++i)
-				if (i!=m) {
-					matrix_aux[p][q]=matrix[i][j];
-					p++;
-				}
-			q++;
-		}
-}
-
-int det_matrix_adj(int matrix[M][M], int dim, int m, int n) {
-	int matrix_aux[M][M];
-	if (dim==1){
-        return(1);
+//========================================CALCULO EN SERIE=================================================
+int gauss(){
+    int i,k,j;
+    long double mi,mk;
+    for(k=0;k<M;++k){
+        for(i=k+1;i<M;++i){
+            if(matrix[k][k] != 0){
+                mi = matrix[i][k];
+                mk = matrix[k][k];
+                for(j=k;j<M;++j){
+                    matrix[i][j] -= (mi/mk)*matrix[k][j];
+                }
+            }
+            else{
+                printf("Fallo al dividir por 0. Retornando... \n");
+                return 1;
+            }
+        }
     }
-	matrix_adj(matrix,matrix_aux,dim,m,n);
-	return calculateInSeries(matrix_aux,dim-1);
 }
 
-int calculateInSeries(int matrix[M][M], int dim) {
-	int i,j,dim_aux,det;
-	for (i=0, j=0, det=0, dim_aux=dim; i<dim; ++i)
-		det += sgn(i+j)*matrix[i][j]*det_matrix_adj(matrix,dim_aux,i,j);
-	return(det);
+long double calculateInSeries(){
+    long double det = 1;
+    for(int i = 0; i<M ; ++ i) det *= matrix[i][i];
+    return det;
 }
 
-void calculateInParallel(){
-    //ImplementarOpenMP
-}
+//======================================CALCULO EN PARALELO==============================================
+
+
 
 int main(){
     init();
-    printf("=====================\n");
     printMatrix();
-    printf("El determinante es %d\n",calculateInSeries(matrix,M));
-    printf("=====================\n");
+    printf("=========CALCULO EN SERIE===========\n");
+    printf("Creando matriz U:\n");
+    if(gauss() != 1){
+        printMatrix();
+        printf("El determinante de la matriz original es: %Lf\n",calculateInSeries());
+    }
+    else{
+        printf("El determinante de la matriz es 0.\n");
+    }
+    /*
+    clock_t start = clock();
+    clock_t end = clock();
+    double seconds;
+    printf("=========CALCULO EN PARALELO============\n");
+    start = clock();
+    printf("El determinante es %f\n",calculateInParallel(matrix,M));
+    end = clock();
+    seconds = (double)(end-start)/CLOCKS_PER_SEC;
+    printf("El tiempo fue %f segundos.",seconds);
+    */
     return 0;
 }
