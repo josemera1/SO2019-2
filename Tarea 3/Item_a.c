@@ -70,38 +70,73 @@ int gauss(){
     }
 }
 
-long double calculateInSeries(){
+long double calcularEnSerie(){
     long double det = 1;
-    for(int i = 0; i<M ; ++ i) det *= matrix[i][i];
-    return det;
+    int i;
+    for(i = 0; i<M ; ++i) det *= matrix[i][i];
 }
 
 //======================================CALCULO EN PARALELO==============================================
 
+long double calcularEnParalelo(){
+    long double det = 1;
+    #pragma omp paralallel for
+        for(int i = 0; i<M ; ++ i) det *= matrix[i][i];
+    return det;
+}
 
+int gaussParalelo(){
+    int i,k,j;
+    long double mi,mk;
+    for(k=0;k<M;++k){
+        for(i=k+1;i<M;++i){
+            if(matrix[k][k] != 0){
+                mi = matrix[i][k];
+                mk = matrix[k][k];
+                for(j=k;j<M;++j){
+                    matrix[i][j] -= (mi/mk)*matrix[k][j];
+                }
+            }
+            else{
+                printf("Fallo al dividir por 0. Retornando... \n");
+                return 1;
+            }
+        }
+    }
+}
 
 int main(){
+    clock_t start_t = clock();
+    clock_t end_t = clock();
+    double start,end,seconds;
     init();
+    printf("Imprimiendo matriz original:\n");
     printMatrix();
+
     printf("=========CALCULO EN SERIE===========\n");
-    printf("Creando matriz U:\n");
-    if(gauss() != 1){
-        printMatrix();
-        printf("El determinante de la matriz original es: %Lf\n",calculateInSeries());
+    printf("Creando matriz U...\n");
+    start_t = clock();
+    if(gaussSerie() != 1){
+        printf("El determinante de la matriz original es: %Lf\n",calcularEnSerie());
     }
     else{
         printf("El determinante de la matriz es 0.\n");
     }
-    /*
-    clock_t start = clock();
-    clock_t end = clock();
-    double seconds;
+    end_t = clock();
+    seconds = (double)(end_t-start_t/CLOCKS_PER_SEC);
+    printf("El tiempo de ejecución sin OpenMP fue: %f segundos\n",seconds);
+
     printf("=========CALCULO EN PARALELO============\n");
-    start = clock();
-    printf("El determinante es %f\n",calculateInParallel(matrix,M));
-    end = clock();
-    seconds = (double)(end-start)/CLOCKS_PER_SEC;
-    printf("El tiempo fue %f segundos.",seconds);
-    */
+    printf("Creando matriz U...\n");
+    start = omp_get_wtime();
+    if(gaussParalelo() != 1){
+        printf("El determinante de la matriz original es: %Lf\n",calcularEnParalelo());
+    }
+    else{
+        printf("El determinante de la matriz es 0.\n");
+    }
+    end = omp_get_wtime();
+    printf("El tiempo de ejecución con OpenMP fue: %f segundos.",end-start);
+
     return 0;
 }
