@@ -5,7 +5,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define M 300
+#define M 50000000
 
 int array[M];
 
@@ -37,6 +37,13 @@ void printArray(){
     int i,j;
     printf("\n");
     for(i = 0; i < M; ++i) printf("%d ",array[i]);
+    printf("\n");
+}
+
+void printArray2(int * array[M]){
+    int i,j;
+    printf("\n");
+    for(i = 0; i < M; ++i) printf("%d ",* array[i]);
     printf("\n");
 }
 
@@ -88,42 +95,43 @@ void mergeSortInSeries(int* array, int start, int end) {
 void mergeSortInParallel(int* array, int start, int end) {
     if(start < end) {
         int middle = (start + end) / 2;
-        #pragma omp parallel sections num_threads(4)
-            {
-            #pragma omp section
-            mergeSortInParallel(array, start, middle);
-            #pragma omp section
-            mergeSortInParallel(array, middle + 1, end);
-            }
+        #pragma omp task
+        mergeSortInParallel(array, start, middle);
+        mergeSortInParallel(array, middle + 1, end);
+        #pragma omp taskwait
         merge(array, start, end);
     }
 }
 
+
 int main(){
+    FILE *f;
+    f = fopen("Item b.txt","w");
     clock_t start_t;
     double start,seconds;
-    printf("Inicializando array...\n");
+    fprintf(f,"Inicializando array...\n");
     init();
     int * array2 = array;
-    //printf("Imprimiendo array original:\n");
-    //printArray();
+    //printf(f,"Imprimiendo array original:\n");
+    //printArray(array); // en consola
 
-    printf("=========CALCULO EN SERIE===========\n");
+    fprintf(f,"=========CALCULO EN SERIE===========\n");
     start_t = clock();
     mergeSortInSeries(array,0,M-1);
     start_t = clock()- start_t;
     seconds = (double)start_t/CLOCKS_PER_SEC;
-    //printArray();
-    //printf("El arreglo final es el siguiente:\n");
-    printf("El tiempo de ejecución sin OpenMP fue: %f segundos\n",seconds);
+    fprintf(f,"El arreglo final es el siguiente:\n");
+    //printArray(array); // en consola
+    fprintf(f,"El tiempo de ejecución sin OpenMP fue: %f segundos\n",seconds);
 
-    printf("=========CALCULO EN PARALELO============\n");
+    fprintf(f,"=========CALCULO EN PARALELO============\n");
     start = omp_get_wtime();
     mergeSortInParallel(array2,0,M-1);
     start = omp_get_wtime() - start;
-    //printf("El arreglo final es el siguiente:\n");
-    //printArray();
-    printf("El tiempo de ejecución con OpenMP fue: %f segundos.\n",start);
+    //fprintf("El arreglo final es el siguiente:\n");
+    //printArray2(array2); // en consola
+    fprintf(f,"El tiempo de ejecución con OpenMP fue: %f segundos.\n",start);
 
+    fclose(f);
     return 0;
 }

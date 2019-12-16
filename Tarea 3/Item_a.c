@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
-#define M 3001
+
+#define M 6000
 
 long double matrix[M][M];
 long double aux[M][M];
