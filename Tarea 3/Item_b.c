@@ -20,7 +20,7 @@ int randomNumber(){
     return (rand() % 10);
 }
 
-void init(){ //Initializing the matrix
+void init(){ 
     int i,j,sign;
     for(i=0;i<M;++i){
         sign = randomNumber();
