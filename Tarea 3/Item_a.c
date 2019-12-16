@@ -117,21 +117,17 @@ int main(){
     clock_t end_t = clock();
     double start,seconds;
     fprintf(f,"Initializing the matrix...\n");
-    printf("Initializing the matrix...\n");
     init();
     //fprintf(f,"Showing original matrix...\n");
     //printMatrix(); //In console
 
     fprintf(f,"=========SERIAL CALCULATION===========\n");
-    printf("=========SERIAL CALCULATION===========\n");
     fprintf(f,"Creating U matrix...\n");
-    printf("Creating U matrix...\n");
     //fprintf(f,"Showing triangular matrix...\n");
     //printMatrix(); //In console
     start_t = clock();
     if(serialGauss() != 1){
         fprintf(f,"Matrix's determinant: %Lf\n",serialCalculation());
-        printf("Matrix's determinant: %Lf\n",serialCalculation());
     }
     else{
         fprintf(f,"Matrix's determinant is 0.\n");
@@ -140,19 +136,14 @@ int main(){
     start_t = clock() - start_t;
     seconds = (double)start_t/CLOCKS_PER_SEC;
     fprintf(f,"Ejecution time without OpenMP was: %f seconds\n",seconds);
-    printf("Ejecution time without OpenMP was: %f seconds\n",seconds);
 
     fprintf(f,"=========PARALLEL CALCULATION============\n");
-    printf("=========PARALLEL CALCULATION============\n");
     fprintf(f,"Creating U matrix...\n");
-    printf("Creating U matrix...\n");
     start = omp_get_wtime();
     parallelGauss(aux);
     fprintf(f,"Matrix's determinant: %Lf\n",parallelCalculation(aux));
-    printf("Matrix's determinant: %Lf\n",parallelCalculation(aux));
     start = omp_get_wtime() - start;
     fprintf(f,"Ejecution time with OpenMP was: %f seconds.",start);
-    printf("Ejecution time with OpenMP was: %f seconds.",start);
     fclose(f);
     return 0;
 }
